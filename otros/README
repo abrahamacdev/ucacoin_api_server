@@ -1,0 +1,12 @@
+
+ucacoin.service: Lanzamos la API REST como un servicio para que se esté ejecutando siempre
+Para levantar el servicio hay que ejecutar:
+    1. Copiar el archivo en el directorio /etc/systemd/system
+    2. Modificar el archivo para incluir las rutas correctas a los ejectuables, scripts...
+    3. systemctl daemon-reload (recarga el listado de servicios)
+    4. systemctl start ucacoin (lanza el servicio)
+
+    1*. systemctl stop ucacoin (para el servicio)
+    2*. systemctl reload-or-restart ucacoin (reinicia el servicio)
+    3*. systemctl enable/disable ucacoin (habilita/deshabilita el servicio)
+    4*. systemctl status ucacoin (muestra el estado del servicio)
