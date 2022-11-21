@@ -2,13 +2,13 @@ from bottle import request, response
 from json import dumps
 import re
 
+
 def __validar_email(username):
     pattern = re.compile(r"^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$")
     return pattern.match(username)
 
 
 def login():
-
     json_response = {}
     status_code = 500
 
