@@ -13,4 +13,11 @@ class UserNotExistException(UcaCoinException):
 class UserIsLoggedException(UcaCoinException):
     pass
 
+
+class UserNotLoggedException(UcaCoinException):
+    pass
+
+
+class UsersExistsException(UcaCoinException):
+    pass
 # ---------------------

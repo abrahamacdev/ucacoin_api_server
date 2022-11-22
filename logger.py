@@ -10,7 +10,9 @@ class _CustomFormatter(logging.Formatter):
     red = "\x1b[31;20m"
     bold_red = "\x1b[31;1m"
     reset = "\x1b[0m"
-    format = "%(asctime)s - %(levelname)s - %(message)s" # %(name)s (%(filename)s:%(lineno)d)"
+
+    # %(name)s (%(filename)s:%(lineno)d)"
+    format = "%(asctime)s - %(levelname)s - %(message)s" if APP_MODE == APPMODES.PRODUCTION else "%(asctime)s - %(levelname)s - (%(filename)s:%(lineno)d) - %(message)s"
 
     FORMATS = {
         logging.DEBUG: grey + format + reset,
@@ -37,11 +39,11 @@ def _initialize_logger():
 
     # Creamos el logger
     _logger = logging.getLogger(APP_NAME)
-    _logger.setLevel(APP_MODE)
+    _logger.setLevel(APP_MODE.value)
 
     # create console handler with a higher log level
     ch = logging.StreamHandler()
-    ch.setLevel(APP_MODE)
+    ch.setLevel(APP_MODE.value)
     ch.setFormatter(_CustomFormatter())
     _logger.addHandler(ch)
 

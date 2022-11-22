@@ -9,7 +9,6 @@ _conn = None
 
 
 def get_conn():
-
     global _conn
 
     if _conn is None:
@@ -20,7 +19,6 @@ def get_conn():
 
 
 def close_conn():
-
     global _conn
 
     if _conn is None:
@@ -53,16 +51,17 @@ def initialize_db():
 
             Logger.info("BD creada")
 
-        Logger.info("BD correcta")
+            # Estamos en desarrollo
+            if APP_MODE == APPMODES.DEV:
+                _create_example_data()
+                Logger.info("Datos de ejemplo añadidos a la bd")
+
+        Logger.info("BD lista")
 
     except Exception as e:
         Logger.error("Ocurrió un error al inicializar la base de datos")
         Logger.error(e)
         exit(1)
-
-    finally:
-        if _conn:
-            _conn.close()
 
 
 def _check_tables(con):
@@ -78,7 +77,7 @@ def _check_tables(con):
 
 
 def _create_db_structure(conn):
-    with open(DB_PATH + 'db.sqlite') as f:
+    with open(DB_INITIAL_SCRIPT) as f:
         script = f.read()
 
         consultas = script.split(";")
@@ -90,3 +89,20 @@ def _create_db_structure(conn):
     # No se han creado las tablas
     if not _check_tables(conn):
         raise Error("No se han podido crear las tablas")
+
+
+def _create_example_data():
+    global _conn
+
+    with open(DB_FAKE_DATA_SCRIPT) as f:
+        script = f.read()
+
+        try:
+            cur = _conn.cursor()
+
+            # Hacemos las insercciones
+            cur.execute(script)
+            _conn.commit()
+
+        except Error as e:
+            raise Error("No se han podido añadir los datos de ejemplo a la bd")

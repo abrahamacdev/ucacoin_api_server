@@ -7,9 +7,9 @@ def setup_routes():
     app = Bottle()
 
     # Relacionado con los usuarios
-    app.route('/login', 'POST', users.login)  # En local, nada de JWT
-    # app.route('/registro', 'POST', users.registro)
-    # app.route('/logout', 'POST', users.logout)
+    app.route('/login', 'POST', users.login)        # En local, nada de JWT
+    app.route('/registro', 'POST', users.register)
+    app.route('/logout', 'POST', users.logout)
 
     # Relacionado con historial
     # app.route('/historial', 'GET', transactions.history)

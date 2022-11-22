@@ -16,9 +16,9 @@ if __name__ == "__main__":
     initialize_db()
 
     # COnfiguramos el enrutamiento de las peticiones
-    #app = setup_routes()
+    app = setup_routes()
 
     Logger.info("API en ejecución...")
 
     # Lanzamos la app
-    #run(app, host='localhost', port=8080)
+    run(app, host='localhost', port=8080)

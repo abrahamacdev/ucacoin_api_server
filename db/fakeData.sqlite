@@ -1,0 +1,3 @@
+INSERT INTO usuario(id, nombre_usuario, passwd_hasheada, email) VALUES
+    (1, 'pepito', 'c8cdf720db5562a039be5d81c51a07c5120eaf0bf142b2144f1a1eb7a95678d3', 'pepito@gmail.com'),
+    (2, 'juan', 'ed08c290d7e22f7bb324b15cbadce35b0b348564fd2d5f95752388d86d71bcca', 'juanito@gmail.com');
