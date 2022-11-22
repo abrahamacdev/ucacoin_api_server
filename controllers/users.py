@@ -2,6 +2,7 @@ from bottle import request, response
 from json import dumps
 import re
 
+from model.users_model import *
 
 def __validar_email(username):
     pattern = re.compile(r"^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$")
@@ -38,6 +39,36 @@ def login():
         response.status = status_code
         return dumps(json_response)
 
+    try:
+        token = get_login(mail, passwd)
 
+        status_code = 200
+        json_response = {
+            "token": token
+        }
 
-    return ""
+    except UserNotExistException as noExistsException:
+
+        status_code = 400
+        json_response = {
+            "msg": 'Usuario o contraseña no válidos'
+        }
+
+    except UserIsLoggedException as loggedException:
+
+        status_code = 400
+        json_response = {
+            "msg": 'El usuario ya está logueado'
+        }
+
+    except Error as error:
+
+        status_code = 500
+        json_response = {
+            "msg": 'Error desconocido'
+        }
+
+    # Enviamos la respuesta
+    response.content_type = 'application/json'
+    response.status = status_code
+    return dumps(json_response)
