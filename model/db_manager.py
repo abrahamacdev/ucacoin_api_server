@@ -1,19 +1,40 @@
 import sqlite3
 from sqlite3 import Error
 
-from utils import *
+from constants import *
 
 from logger import Logger
-
 
 _conn = None
 
 
 def get_conn():
-    return _conn
+
+    global _conn
+
+    if _conn is None:
+        raise Exception("La conexión con la base de datos ya se cerró.")
+
+    else:
+        return _conn
 
 
-def check_db():
+def close_conn():
+
+    global _conn
+
+    if _conn is None:
+        raise Exception("Error al cerrar la conexión.")
+
+    try:
+        _conn.close()
+        _conn = None
+
+    except Error as e:
+        raise e
+
+
+def initialize_db():
     """
     Comprueba si existe la base de datos. Si no lo está, la crea.
     """

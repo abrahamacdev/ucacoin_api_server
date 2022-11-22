@@ -1,26 +1,8 @@
-import os
-from enum import Enum
-import logging
-
-# SRC_DIR = os.getcwd()
-
-APP_NAME = 'UCA_COIN'
-
-# Directorio raiz del proyecto
-ROOT_PATH = os.path.dirname(os.path.abspath(os.path.abspath(__file__)))
-
-# Constantes relacionadas con la base de datos
-DB_PATH = ROOT_PATH + '/db/'
-DB_INITIAL_SCRIPT = DB_PATH + 'db.sqlite'  # Script inicial para la creacion de la estructura de la BD.
-DB_NAME = 'ucacoin.db'  # Archivo de la base de datos
+import random
+import string
 
 
-#
-class __APPMODE(Enum):
-    DEV = logging.DEBUG
-    PRODUCTION = logging.CRITICAL
-
-
-# Indica el nivel de depuracion.
-__MODE = __APPMODE.DEV
-APP_MODE = __MODE.value
+def get_random_string(length):
+    # get random password pf length 8 with letters, digits, and symbols
+    characters = string.ascii_letters + string.digits + string.punctuation
+    return ''.join(random.choice(characters) for i in range(length))

@@ -13,7 +13,7 @@ def index(name):
 if __name__ == "__main__":
 
     # Inicializamos la base de datos
-    check_db()
+    initialize_db()
 
     # COnfiguramos el enrutamiento de las peticiones
     #app = setup_routes()

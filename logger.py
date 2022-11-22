@@ -1,6 +1,6 @@
 import logging
 
-from utils import *
+from constants import *
 
 _logger = None
 

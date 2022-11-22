@@ -2,7 +2,9 @@ CREATE TABLE IF NOT EXISTS usuario (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     nombre_usuario VARCHAR(255) NOT NULL,
     passwd_hasheada VARCHAR(255) NOT NULL,
-    UNIQUE(nombre_usuario)
+    email VARCHAR(255) NOT NULL,
+    UNIQUE(nombre_usuario),
+    UNIQUE(email)
 );
 
 CREATE TABLE IF NOT EXISTS transaccion (
@@ -16,6 +18,7 @@ CREATE TABLE IF NOT EXISTS transaccion (
 );
 
 CREATE TABLE IF NOT EXISTS login (
-    id INTEGER PRIMARY KEY NOT NULL,
-    token VARCHAR(255) NOT NULL
+    token VARCHAR(255) PRIMARY KEY,
+    email VARCHAR(255) NOT NULL,
+    FOREIGN KEY (email) REFERENCES usuario(email) ON UPDATE CASCADE ON DELETE CASCADE,
 );
