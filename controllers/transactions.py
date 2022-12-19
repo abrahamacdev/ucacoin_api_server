@@ -1,0 +1,299 @@
+from bottle import request, response
+from json import dumps
+import re
+
+from model.users_model import *
+from model import transactions_model
+from logger import Logger
+from controllers import security
+
+
+def _process_balance(user_email, transactions):
+    valid_transactions = []
+
+    for transaction in transactions:
+        receive_time = transaction[7]
+
+
+        # No ha recibido la transaccion aun
+        if receive_time is None:
+            break
+
+        # Transaccion realizada
+        else:
+            valid_transactions.append(transaction)
+
+    balance = 0.0
+
+    # Si es receptor, aumenta el saldo. Si es emisor, disminuye el saldo
+    for valid_transaction in valid_transactions:
+        balance += valid_transaction[5] if valid_transaction[4] == user_email else -valid_transaction[5]
+
+    return balance
+
+def _get_balance(email):
+
+    transactions = transactions_model.get_transactions_from_user(email)
+    balance = _process_balance(email, transactions)
+
+    return balance
+
+def send():
+
+    json_response = {}
+    status_code = 500
+
+    # Faltan datos
+    if 'token' not in request.json or 'receptor' not in request.json or 'cantidad' not in request.json:
+        json_response = {
+            "msg": 'Faltan datos'
+        }
+        status_code = 400
+
+        response.content_type = 'application/json'
+        response.status = status_code
+        return dumps(json_response)
+
+    # Parseamos el token
+    token = request.json['token'].strip()
+    receptor = request.json['receptor'].strip()
+    quantity = 0.0
+
+    # La cantidad tiene que ser un número
+    try:
+        quantity = float(request.json['cantidad'].strip())
+
+    except:
+
+        json_response = {
+            "msg": 'Peticion mal formulada'
+        }
+        status_code = 400
+
+        response.content_type = 'application/json'
+        response.status = status_code
+        return dumps(json_response)
+
+    # Comprobamos que el usario esté logueado
+    try:
+        if not security.check_user_token(token):
+            json_response = {
+                "msg": 'Token no válido'
+            }
+            status_code = 400
+
+            response.content_type = 'application/json'
+            response.status = status_code
+            return dumps(json_response)
+    except Exception as e:
+        json_response = {
+            "msg": 'Ocurrió un error desconocido'
+        }
+        status_code = 500
+
+        response.content_type = 'application/json'
+        response.status = status_code
+        return dumps(json_response)
+
+    # Obtenemos el correo del usuario a partir del token
+    sender_id = ''
+    sender_email = ''
+    try:
+        user = security.get_user_with_token(token)
+        sender_email = user[3]
+        sender_id = user[0]
+
+    except Exception as e:
+        json_response = {
+            "msg": 'Ocurrió un error desconocido'
+        }
+        status_code = 500
+
+        response.content_type = 'application/json'
+        response.status = status_code
+        return dumps(json_response)
+
+    # Obtenemos el id del emisor y receptor
+    receiver_id = ''
+    try:
+        sender_id = get_userid_from_email(sender_email)
+        receiver_id = get_userid_from_username(receptor)
+
+    except UserNotExistException as eUser:
+        json_response = {
+            "msg": 'No existe dicho usuario'
+        }
+        status_code = 400
+
+        response.content_type = 'application/json'
+        response.status = status_code
+        return dumps(json_response)
+
+    except Exception as e:
+        json_response = {
+            "msg": 'Ocurrió un error desconocido'
+        }
+        status_code = 500
+
+        response.content_type = 'application/json'
+        response.status = status_code
+        return dumps(json_response)
+
+    # Comprobamos que tenga suficientes fondos
+    balance = _get_balance(sender_email)
+
+    # Quiere enviar más dinero del que tiene
+    if balance < quantity:
+        json_response = {
+            "msg": 'Fondos insuficientes'
+        }
+        status_code = 400
+
+        response.content_type = 'application/json'
+        response.status = status_code
+        return dumps(json_response)
+
+
+    # TODO Guardar la transacción en la base de datos
+
+    # Devolvemos la creación de la transacción
+    status_code = 202
+
+    response.content_type = 'application/json'
+    response.status = status_code
+    return dumps(json_response)
+
+def actual_balance():
+    json_response = {}
+    status_code = 500
+
+    # Falta token
+    if 'token' not in request.json:
+        json_response = {
+            "msg": 'Falta el token del usuario'
+        }
+        status_code = 400
+
+        response.content_type = 'application/json'
+        response.status = status_code
+        return dumps(json_response)
+
+    # Parseamos el token
+    token = request.json['token'].strip()
+
+    # Comprobamos que el usario esté logueado
+    try:
+        if not security.check_user_token(token):
+            json_response = {
+                "msg": 'Token no válido'
+            }
+            status_code = 400
+
+            response.content_type = 'application/json'
+            response.status = status_code
+            return dumps(json_response)
+    except Exception as e:
+        json_response = {
+            "msg": 'Ocurrió un error desconocido'
+        }
+        status_code = 500
+
+        response.content_type = 'application/json'
+        response.status = status_code
+        return dumps(json_response)
+
+    # Obtenemos el correo del usuario a partir del token
+    email = ''
+    try:
+        email = security.get_user_with_token(token)[3]
+
+    except Exception as e:
+        json_response = {
+            "msg": 'Ocurrió un error desconocido'
+        }
+        status_code = 500
+
+        response.content_type = 'application/json'
+        response.status = status_code
+        return dumps(json_response)
+
+    # Obtenemos las transacciones del usuario
+    balance = _get_balance(email)
+
+    # Las devolvemos
+    json_response = {
+        "balance": balance
+    }
+    status_code = 200
+
+    response.content_type = 'application/json'
+    response.status = status_code
+    return dumps(json_response)
+
+def history():
+    json_response = {}
+    status_code = 500
+
+    # Falta username o password
+    if 'token' not in request.json:
+        json_response = {
+            "msg": 'Falta el token del usuario'
+        }
+        status_code = 400
+
+        response.content_type = 'application/json'
+        response.status = status_code
+        return dumps(json_response)
+
+    # Parseamos el username y el password
+    token = request.json['token'].strip()
+
+    # Comprobamos que el usario esté logueado
+    try:
+        if not security.check_user_token(token):
+            json_response = {
+                "msg": 'Token no válido'
+            }
+            status_code = 400
+
+            response.content_type = 'application/json'
+            response.status = status_code
+            return dumps(json_response)
+
+    except Exception as e:
+        json_response = {
+            "msg": 'Ocurrió un error desconocido'
+        }
+        status_code = 500
+
+        response.content_type = 'application/json'
+        response.status = status_code
+        return dumps(json_response)
+
+    # Obtenemos el correo del usuario a partir del token
+    email = ''
+    try:
+        email = security.get_user_with_token(token)
+
+    except Exception as e:
+        json_response = {
+            "msg": 'Ocurrió un error desconocido'
+        }
+        status_code = 500
+
+        response.content_type = 'application/json'
+        response.status = status_code
+        return dumps(json_response)
+
+    # Obtenemos las transacciones del usuario
+    transactions = transactions_model.get_transactions_from_user(email)
+
+    # Las devolvemos
+    json_response = {
+        "transactions": transactions
+    }
+    status_code = 200
+
+    response.content_type = 'application/json'
+    response.status = status_code
+    return dumps(json_response)

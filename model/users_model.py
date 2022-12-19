@@ -8,6 +8,53 @@ from model import db_manager
 import utils
 import constants
 
+def get_userid_from_username(username):
+    conn = db_manager.get_conn()
+
+    try:
+
+        data = (username, )
+
+        cursor = conn.cursor()
+
+        # Comprobamos si existe un con dicho email
+        res = cursor.execute("SELECT id FROM usuario WHERE nombre_usuario = ?", data)
+        res = res.fetchone()
+
+        # No existe ningun usuario con ese nombre de usuario
+        if res is None:
+            raise UserNotExistException()
+
+        else:
+            return res
+
+    # Ocurrió un error en la bd
+    except Error as e:
+        raise e
+
+def get_userid_from_email(email):
+    conn = db_manager.get_conn()
+
+    try:
+
+        data = (email,)
+
+        cursor = conn.cursor()
+
+        # Comprobamos si existe un con dicho email
+        res = cursor.execute("SELECT id FROM usuario WHERE email = ?", data)
+        res = res.fetchone()
+
+        # No existe ningun usuario con ese nombre de usuario
+        if res is None:
+            raise UserNotExistException()
+
+        else:
+            return res
+
+    # Ocurrió un error en la bd
+    except Error as e:
+        raise e
 
 def register_new_user(email, username, passwd):
     # Comprobamos que no halla un usuario con los mismos datos
@@ -88,7 +135,6 @@ def login_user(email, passwd):
     # El usuario no existe
     else:
         raise UserNotExistException()
-
 
 def _is_user_logged_by_email(email):
     """

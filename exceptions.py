@@ -21,3 +21,10 @@ class UserNotLoggedException(UcaCoinException):
 class UsersExistsException(UcaCoinException):
     pass
 # ---------------------
+
+
+
+# ----- Seguridad ------
+class InvalidTokenException(UcaCoinException):
+    pass
+

@@ -101,7 +101,7 @@ def _create_example_data():
             cur = _conn.cursor()
 
             # Hacemos las insercciones
-            cur.execute(script)
+            cur.executescript(script)
             _conn.commit()
 
         except Error as e:

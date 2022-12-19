@@ -1,7 +1,7 @@
 from bottle import Bottle, route, run, template
 
 from controllers import users
-
+from controllers import transactions
 
 def setup_routes():
     app = Bottle()
@@ -12,10 +12,10 @@ def setup_routes():
     app.route('/logout', 'POST', users.logout)
 
     # Relacionado con historial
-    # app.route('/historial', 'GET', transactions.history)
-    # app.route('/balance', 'GET', transactions.actual_balance)
+    app.route('/historial', 'GET', transactions.history)
+    app.route('/balance', 'GET', transactions.actual_balance)
 
     # Relacionado con transacciones
-    # app.route('/enviar', 'POST', transactions.send)
+    app.route('/enviar', 'POST', transactions.send)
 
     return app

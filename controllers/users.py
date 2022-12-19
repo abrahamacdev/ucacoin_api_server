@@ -20,7 +20,6 @@ def _check_new_register_data(data):
 
     return inside == len(necessary_fields)
 
-
 def login():
     json_response = {}
     status_code = 500
