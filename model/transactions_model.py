@@ -28,3 +28,20 @@ def get_transactions_from_user(email):
     # Ocurrió un error en la bd
     except Error as e:
         raise e
+
+def add_new_transaction(quantity, sender_id, receiver_id):
+    conn = db_manager.get_conn()
+
+    try:
+
+        data = (sender_id, receiver_id, quantity)
+
+        cursor = conn.cursor()
+
+        # Creamos al nuevo usuario
+        cursor.execute("INSERT INTO transaccion (id_emisor, id_receptor, cantidad) VALUES (?, ?, ?)", data)
+        conn.commit()
+
+    # Ocurrió un error en la bd
+    except Error as e:
+        raise e

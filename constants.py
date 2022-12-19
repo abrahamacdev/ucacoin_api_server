@@ -3,6 +3,7 @@ from enum import Enum
 import logging
 
 # SRC_DIR = os.getcwd()
+SERVER_PORT = 8080
 
 APP_NAME = 'UCA_COIN'
 

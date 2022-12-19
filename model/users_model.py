@@ -26,7 +26,7 @@ def get_userid_from_username(username):
             raise UserNotExistException()
 
         else:
-            return res
+            return res[0]
 
     # Ocurrió un error en la bd
     except Error as e:
@@ -50,7 +50,7 @@ def get_userid_from_email(email):
             raise UserNotExistException()
 
         else:
-            return res
+            return res[0]
 
     # Ocurrió un error en la bd
     except Error as e:

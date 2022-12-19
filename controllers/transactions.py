@@ -14,7 +14,6 @@ def _process_balance(user_email, transactions):
     for transaction in transactions:
         receive_time = transaction[7]
 
-
         # No ha recibido la transaccion aun
         if receive_time is None:
             break
@@ -31,15 +30,15 @@ def _process_balance(user_email, transactions):
 
     return balance
 
-def _get_balance(email):
 
+def _get_balance(email):
     transactions = transactions_model.get_transactions_from_user(email)
     balance = _process_balance(email, transactions)
 
     return balance
 
-def send():
 
+def send():
     json_response = {}
     status_code = 500
 
@@ -61,10 +60,9 @@ def send():
 
     # La cantidad tiene que ser un número
     try:
-        quantity = float(request.json['cantidad'].strip())
+        quantity = float(request.json['cantidad'])
 
-    except:
-
+    except Exception as e:
         json_response = {
             "msg": 'Peticion mal formulada'
         }
@@ -139,22 +137,49 @@ def send():
         response.status = status_code
         return dumps(json_response)
 
-    # Comprobamos que tenga suficientes fondos
-    balance = _get_balance(sender_email)
-
-    # Quiere enviar más dinero del que tiene
-    if balance < quantity:
+    # Comprobamos que no se esté intentando enviar dinero a sí mismo
+    if receiver_id == sender_id:
         json_response = {
-            "msg": 'Fondos insuficientes'
+            "msg": 'Mismo emisor y receptor'
         }
         status_code = 400
 
         response.content_type = 'application/json'
         response.status = status_code
+
+    # Comprobamos que tenga suficientes fondos
+    balance = _get_balance(sender_email)
+
+    """ 
+    En caso de que estemos enviando dinero desde la cuenta ROOT y estemos en modo desarrollo, no comprobaremos los fondos
+    del emisor (root), en caso contrario comprobamos los fondos de la cuenta
+    """
+    if constants.APP_MODE == constants.APPMODES.PRODUCTION or (constants.APP_MODE == constants.APPMODES.DEV and sender_id != 1):
+
+        # Quiere enviar más dinero del que tiene
+        if balance < quantity:
+            json_response = {
+                "msg": 'Fondos insuficientes'
+            }
+            status_code = 400
+
+            response.content_type = 'application/json'
+            response.status = status_code
+            return dumps(json_response)
+
+    # Creamos la transacción en la base de datos
+    try:
+        transactions_model.add_new_transaction(quantity, sender_id, receiver_id)
+
+    except Exception as e:
+        json_response = {
+            "msg": 'Ocurrio un error inesperado'
+        }
+        status_code = 500
+
+        response.content_type = 'application/json'
+        response.status = status_code
         return dumps(json_response)
-
-
-    # TODO Guardar la transacción en la base de datos
 
     # Devolvemos la creación de la transacción
     status_code = 202
@@ -162,6 +187,7 @@ def send():
     response.content_type = 'application/json'
     response.status = status_code
     return dumps(json_response)
+
 
 def actual_balance():
     json_response = {}
@@ -230,6 +256,24 @@ def actual_balance():
     response.status = status_code
     return dumps(json_response)
 
+def _filter_history_fields(history):
+
+    final_history = []
+
+    for transaction in history:
+        temp = {
+            'id': transaction[0],
+            'emisor': transaction[1],
+            'receptor': transaction[3],
+            'cantidad': transaction[5],
+            'fecha_envio': transaction[6],
+            'fecha_recepcion': transaction[7]
+        }
+
+        final_history.append(temp)
+
+    return final_history
+
 def history():
     json_response = {}
     status_code = 500
@@ -273,7 +317,7 @@ def history():
     # Obtenemos el correo del usuario a partir del token
     email = ''
     try:
-        email = security.get_user_with_token(token)
+        email = security.get_user_with_token(token)[3]
 
     except Exception as e:
         json_response = {
@@ -287,10 +331,12 @@ def history():
 
     # Obtenemos las transacciones del usuario
     transactions = transactions_model.get_transactions_from_user(email)
+    transactions = _filter_history_fields(transactions)
+
 
     # Las devolvemos
     json_response = {
-        "transactions": transactions
+        "transacciones": transactions
     }
     status_code = 200
 

@@ -1,3 +1,4 @@
+import constants
 import logger
 from model.db_manager import *
 from controllers.router import *
@@ -21,4 +22,4 @@ if __name__ == "__main__":
     Logger.info("API en ejecución...")
 
     # Lanzamos la app
-    run(app, host='localhost', port=8080)
+    run(app, host='localhost', port=constants.SERVER_PORT)
