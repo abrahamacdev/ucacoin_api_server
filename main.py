@@ -1,7 +1,9 @@
-# This is a sample Python script.
-import bottle
-from bottle import route, run, template
+import constants
+import logger
+from model.db_manager import *
+from controllers.router import *
 
+from logger import Logger
 
 @route('/hello/<name>')
 def index(name):
@@ -11,9 +13,13 @@ def index(name):
 
 if __name__ == "__main__":
 
-    app = bottle.Bottle()
+    # Inicializamos la base de datos
+    initialize_db()
 
-    # app.route(#endpoint, #métodoHTTP, #claseControladora.metodo)
+    # COnfiguramos el enrutamiento de las peticiones
+    app = setup_routes()
+
+    Logger.info("API en ejecución...")
 
     # Lanzamos la app
-    run(app, host='localhost', port=8080)
+    run(app, host='localhost', port=constants.SERVER_PORT)
