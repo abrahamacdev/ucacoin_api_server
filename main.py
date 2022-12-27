@@ -22,4 +22,4 @@ if __name__ == "__main__":
     Logger.info("API en ejecución...")
 
     # Lanzamos la app
-    run(app, host='localhost', port=constants.SERVER_PORT)
+    run(app, host='0.0.0.0', port=constants.SERVER_PORT)
