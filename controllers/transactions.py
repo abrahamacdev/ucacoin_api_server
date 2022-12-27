@@ -72,6 +72,17 @@ def send():
         response.status = status_code
         return dumps(json_response)
 
+    # No se puede enviar saldo negativo
+    if quantity <= 0.0:
+        json_response = {
+            "msg": 'Peticion mal formulada'
+        }
+        status_code = 400
+
+        response.content_type = 'application/json'
+        response.status = status_code
+        return dumps(json_response)
+
     # Comprobamos que el usario esté logueado
     try:
         if not security.check_user_token(token):
