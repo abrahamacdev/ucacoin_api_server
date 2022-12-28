@@ -6,6 +6,8 @@ class UcaCoinException(Exception):
 
 
 # ----- Usuarios ------
+class BlockchainRegisterException(UcaCoinException):
+    pass
 class UserNotExistException(UcaCoinException):
     pass
 
@@ -26,5 +28,10 @@ class UsersExistsException(UcaCoinException):
 
 # ----- Seguridad ------
 class InvalidTokenException(UcaCoinException):
+    pass
+
+
+# ----- Transacciones ------
+class BlockchainTransferError(UcaCoinException):
     pass
 

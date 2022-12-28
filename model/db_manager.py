@@ -1,4 +1,6 @@
+import json
 import sqlite3
+import requests
 from sqlite3 import Error
 
 from constants import *
@@ -42,6 +44,8 @@ def initialize_db():
     try:
         _conn = sqlite3.connect(DB_PATH + DB_NAME)
 
+        cursor = _conn.cursor()
+
         # La tablas no están creadas
         if not _check_tables(_conn):
             Logger.warning("No se creó la estructura de la base de datos.")
@@ -53,12 +57,23 @@ def initialize_db():
 
             # Estamos en desarrollo
             if APP_MODE == APPMODES.DEV:
-                _create_example_data()
+
+                # Registramos usuarios de prueba
+                _create_example_data(cursor)
+
+                # Registramos a los usuarios en la blockchain
+                _register_example_keys(cursor)
+
                 Logger.info("Datos de ejemplo añadidos a la bd")
+
+            # Guardamos los cambios
+            _conn.commit()
 
         Logger.info("BD lista")
 
     except Exception as e:
+        _conn.rollback()                # No guardamos los datos en la bd
+        os.remove(DB_PATH + DB_NAME)    # Eliminamos la bd
         Logger.error("Ocurrió un error al inicializar la base de datos")
         Logger.error(e)
         exit(1)
@@ -76,33 +91,70 @@ def _check_tables(con):
         return False
 
 
-def _create_db_structure(conn):
-    with open(DB_INITIAL_SCRIPT) as f:
-        script = f.read()
+def _create_db_structure(cur):
 
-        consultas = script.split(";")
+    try:
 
-        # Creamos las tablas
-        for consulta in consultas:
-            conn.execute(consulta)
+        # Leemos el script para crear la base de datos
+        with open(DB_INITIAL_SCRIPT) as f:
+            script = f.read()
 
-    # No se han creado las tablas
-    if not _check_tables(conn):
+            # Creamos la estructura de la bd
+            cur.executescript(script)
+
+    # No se ha podido crear la bd
+    except Error as e:
+
         raise Error("No se han podido crear las tablas")
 
 
-def _create_example_data():
-    global _conn
+def _create_example_data(cur):
 
     with open(DB_FAKE_DATA_SCRIPT) as f:
         script = f.read()
 
         try:
-            cur = _conn.cursor()
 
             # Hacemos las insercciones
             cur.executescript(script)
-            _conn.commit()
 
         except Error as e:
             raise Error("No se han podido añadir los datos de ejemplo a la bd")
+
+def _register_example_keys(cur):
+
+    try:
+
+        # Obtenemos todos los usuarios "pendientes de registro"
+        res = cur.execute("SELECT * FROM usuario WHERE clave_privada IS NULL")
+        users = res.fetchall()
+
+        url = HTTP_PROTOCOL + BLOCKCHAIN_API_IP + str(BLOCKCHAIN_API_PORT) + BLOCKCHAIN_REGISTER_ENDPOINT
+
+        # Registramos a cada usuario en la blockchain
+        for user in users:
+            username = user[1]
+            body = {
+                "username": username
+            }
+
+            # Peticion http a la blockchain
+            response = requests.get(url, json=body).json()
+
+            # Miramos el codigo de respuesta
+            code = response['Code']
+
+            # Le guardamos la clave en la bd
+            if code == 201:
+                data = (response['private_key'], user[0])
+
+                # Actualizamos la clave privada del usuario en la bd
+                cur.execute("UPDATE usuario SET clave_privada = ? WHERE id = ?", data)
+
+            # Ocurrio un error
+            else:
+                raise Error("No se pudo registrar a los usuarios en la blockchain")
+
+    # Ocurrió un error en la bd
+    except Error as e:
+        raise e

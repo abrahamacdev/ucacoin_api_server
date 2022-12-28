@@ -3,8 +3,10 @@ CREATE TABLE IF NOT EXISTS usuario (
     nombre_usuario VARCHAR(255) NOT NULL,
     passwd_hasheada VARCHAR(255) NOT NULL,
     email VARCHAR(255) NOT NULL,
+    clave_privada TEXT DEFAULT NULL,
     UNIQUE(nombre_usuario),
-    UNIQUE(email)
+    UNIQUE(email),
+    UNIQUE(clave_privada)
 );
 
 CREATE TABLE IF NOT EXISTS transaccion (
@@ -12,7 +14,7 @@ CREATE TABLE IF NOT EXISTS transaccion (
     id_emisor INTEGER NOT NULL DEFAULT -1,
     id_receptor INTEGER NOT NULL DEFAULT -1,
     fecha_envio INTEGER NOT NULL DEFAULT (datetime('now','localtime')),
-    fecha_recepcion INTEGER,
+    fecha_recepcion INTEGER DEFAULT (datetime('now','localtime')),
     cantidad REAL NOT NULL,
     FOREIGN KEY (id_emisor) REFERENCES usuario(id) ON UPDATE CASCADE ON DELETE SET DEFAULT,
     FOREIGN KEY (id_receptor) REFERENCES usuario(id) ON UPDATE CASCADE ON DELETE SET DEFAULT

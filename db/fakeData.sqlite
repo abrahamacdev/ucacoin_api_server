@@ -1,7 +1,7 @@
 INSERT INTO usuario(id, nombre_usuario, passwd_hasheada, email) VALUES
     (1, 'system', '4813494d137e1631bba301d5acab6e7bb7aa74ce1185d456565ef51d737677b2', 'root@ucacoin.com'),
-    (2, 'pepito', 'c8cdf720db5562a039be5d81c51a07c5120eaf0bf142b2144f1a1eb7a95678d3', 'pepito@gmail.com'),
-    (3, 'juan', 'ed08c290d7e22f7bb324b15cbadce35b0b348564fd2d5f95752388d86d71bcca', 'juanito@gmail.com');
+    (2, 'pepito', 'c8cdf720db5562a039be5d81c51a07c5120eaf0bf142b2144f1a1eb7a95678d3', 'pepito@gmail.com');
+    /*(3, 'juanito', '46b2150accc75b4ae7b461fe4f5dde39512d2e034ee4d91df9c09b9bd0e090c9', 'juanito@gmail.com');*/
 
 INSERT INTO login(token, email) VALUES
     ('ef14831c0a33a9c42a61c44d99fdc450e48ba4f1be8988f0262855831e02d079', 'pepito@gmail.com'),
@@ -10,7 +10,7 @@ INSERT INTO login(token, email) VALUES
 /* El primero es para el select, el segundo es para insertar */
 /* CAST(strftime('%s', '2018-03-31 01:02:03') as integer) */
 /* strftime('%Y-%m-%d %H:%M:%S', '2022-12-08 22:30:00') */
-INSERT INTO transaccion(id, id_emisor, id_receptor, fecha_envio, fecha_recepcion, cantidad) VALUES
+/*INSERT INTO transaccion(id, id_emisor, id_receptor, fecha_envio, fecha_recepcion, cantidad) VALUES
     (1, 2, 3, strftime('%Y-%m-%d %H:%M:%S', '2022-12-08 22:30:00'), strftime('%Y-%m-%d %H:%M:%S', '2022-12-08 23:15:00'), 100.15),
-    (2, 2, 3, strftime('%Y-%m-%d %H:%M:%S', '2022-12-08 22:35:00'), NULL, 12);
+    (2, 2, 3, strftime('%Y-%m-%d %H:%M:%S', '2022-12-08 22:35:00'), NULL, 12);*/
 
