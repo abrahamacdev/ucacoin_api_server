@@ -55,7 +55,7 @@ def send():
 
     # Parseamos el token
     token = request.json['token'].strip()
-    receptor = request.json['receptor'].strip()
+    receiver_username = request.json['receptor'].strip()
     quantity = 0.0
 
     # La cantidad tiene que ser un número
@@ -107,9 +107,11 @@ def send():
     # Obtenemos el correo del usuario a partir del token
     sender_id = ''
     sender_email = ''
+    sender_username = ''
     try:
         user = security.get_user_with_token(token)
         sender_email = user[3]
+        sender_username = user[1]
         sender_id = user[0]
 
     except Exception as e:
@@ -125,8 +127,7 @@ def send():
     # Obtenemos el id del emisor y receptor
     receiver_id = ''
     try:
-        sender_id = get_userid_from_email(sender_email)
-        receiver_id = get_userid_from_username(receptor)
+        receiver_id = get_userid_from_username(receiver_username)
 
     except UserNotExistException as eUser:
         json_response = {
@@ -180,7 +181,22 @@ def send():
 
     # Creamos la transacción en la base de datos
     try:
-        transactions_model.add_new_transaction(quantity, sender_id, receiver_id)
+
+        # Obtenemos la clave privada del emisor
+        private_key = get_private_key_from_id(sender_id)
+
+        # Intentamos hacer la transferencia
+        transactions_model.add_new_transaction(quantity, sender_id, receiver_id, sender_username, receiver_username, private_key)
+
+    except BlockchainTransferError as transferE:
+        json_response = {
+            "msg": 'No se añadir la transferencia a la blockchain'
+        }
+        status_code = 500
+
+        response.content_type = 'application/json'
+        response.status = status_code
+        return dumps(json_response)
 
     except Exception as e:
         json_response = {

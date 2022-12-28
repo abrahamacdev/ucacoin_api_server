@@ -121,6 +121,7 @@ def register():
 
     # Los intentamos registrar en la bd
     try:
+
         register_new_user(email, username, password)
 
         status_code = 201
@@ -133,6 +134,12 @@ def register():
         status_code = 400
         json_response = {
             "msg": 'Ya existe un usuario con esos datos'
+        }
+
+    except BlockchainRegisterException as blockE:
+        status_code = 500
+        json_response = {
+            "msg": 'No se pudo registrar al usuario en la blockchain'
         }
 
     except Error as e:

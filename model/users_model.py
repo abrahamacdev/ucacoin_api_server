@@ -2,18 +2,21 @@ from sqlite3 import Error
 import sqlite3
 from hashlib import sha256
 
+import requests
+
 from logger import Logger
 from exceptions import *
 from model import db_manager
 import utils
 import constants
 
+
 def get_userid_from_username(username):
     conn = db_manager.get_conn()
 
     try:
 
-        data = (username, )
+        data = (username,)
 
         cursor = conn.cursor()
 
@@ -31,6 +34,7 @@ def get_userid_from_username(username):
     # Ocurrió un error en la bd
     except Error as e:
         raise e
+
 
 def get_userid_from_email(email):
     conn = db_manager.get_conn()
@@ -56,15 +60,71 @@ def get_userid_from_email(email):
     except Error as e:
         raise e
 
+def get_private_key_from_id(id):
+    conn = db_manager.get_conn()
+
+    try:
+
+        data = (id,)
+
+        cursor = conn.cursor()
+
+        # Comprobamos si existe un con dicho email
+        res = cursor.execute("SELECT clave_privada FROM usuario WHERE id = ?", data)
+        res = res.fetchone()
+
+        # No existe ningun usuario con ese nombre id
+        if res is None:
+            raise UserNotExistException()
+
+        else:
+            return res[0]
+
+    # Ocurrió un error en la bd
+    except Error as e:
+        raise e
+
 def register_new_user(email, username, passwd):
     # Comprobamos que no halla un usuario con los mismos datos
     _check_user_exists(email, username)
+
+    # Lo registramos en la blockchain
+    private_key = _register_user_in_blockchain(username)
 
     # Hasheamos la contrasenia
     hashed_passwd = sha256(passwd.encode('utf-8')).hexdigest()
 
     # Creamos al usuario
-    _create_user(email, username, hashed_passwd)
+    _create_user(email, username, hashed_passwd, private_key)
+
+
+def _register_user_in_blockchain(username):
+    try:
+
+        # Lo registramos en la blockchain
+        body = {
+            "username": username
+        }
+
+        # Peticion http a la blockchain
+        url = constants.HTTP_PROTOCOL + constants.BLOCKCHAIN_API_IP + str(
+            constants.BLOCKCHAIN_API_PORT) + constants.BLOCKCHAIN_REGISTER_ENDPOINT
+
+        blockchain_response = requests.get(url, json=body).json()
+
+        # Miramos el codigo de respuesta
+        code = blockchain_response['Code']
+
+        # Se registro correctamente
+        if code == 201:
+            return blockchain_response['private_key']
+
+        # Ocurrio un error
+        else:
+            raise Error()
+
+    except Error as e:
+        raise BlockchainRegisterException("No se pudo registrar al usuario en la blockchain")
 
 
 def _check_user_exists(email, username):
@@ -90,22 +150,25 @@ def _check_user_exists(email, username):
         raise e
 
 
-def _create_user(email, username, hashed_passwd):
+def _create_user(email, username, hashed_passwd, private_key):
     conn = db_manager.get_conn()
 
     try:
 
-        data = (username, hashed_passwd, email)
+        data = (username, hashed_passwd, email, private_key)
 
         cursor = conn.cursor()
 
         # Creamos al nuevo usuario
-        cursor.execute("INSERT INTO usuario (nombre_usuario, passwd_hasheada, email) VALUES (?, ?, ?)", data)
+        cursor.execute(
+            "INSERT INTO usuario (nombre_usuario, passwd_hasheada, email, clave_privada) VALUES (?, ?, ?, ?)", data)
         conn.commit()
 
     # Ocurrió un error en la bd
     except Error as e:
+        conn.rollback()
         raise e
+
 
 def login_user(email, passwd):
     conn = db_manager.get_conn()
@@ -136,6 +199,7 @@ def login_user(email, passwd):
     else:
         raise UserNotExistException()
 
+
 def _is_user_logged_by_email(email):
     """
     Comprueba si un usuario está ya logueado.
@@ -154,6 +218,7 @@ def _is_user_logged_by_email(email):
     # Comprobamos si existe un con dicho email
     res = cursor.execute("SELECT email FROM login WHERE email = ?", data)
     return res.fetchone() is not None
+
 
 def _is_user_logged_by_token(token):
     """
@@ -174,6 +239,7 @@ def _is_user_logged_by_token(token):
     res = cursor.execute("SELECT email FROM login WHERE token = ?", data)
 
     return res.fetchone() is not None
+
 
 def _login(mail):
     """
@@ -199,6 +265,7 @@ def _login(mail):
 
     return token
 
+
 def _logout(token):
     """
     Desloguea a un usuario del sistema.
@@ -210,10 +277,11 @@ def _logout(token):
     conn = db_manager.get_conn()
     cursor = conn.cursor()
 
-    data = (token, )
+    data = (token,)
 
     cursor.execute("DELETE FROM login WHERE token = ?", data)
     conn.commit()
+
 
 def logout_user(token):
     """
