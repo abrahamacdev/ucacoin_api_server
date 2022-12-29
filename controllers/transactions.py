@@ -7,35 +7,8 @@ from model import transactions_model
 from logger import Logger
 from controllers import security
 
-
-def _process_balance(user_email, transactions):
-    valid_transactions = []
-
-    for transaction in transactions:
-        receive_time = transaction[7]
-
-        # No ha recibido la transaccion aun
-        if receive_time is None:
-            break
-
-        # Transaccion realizada
-        else:
-            valid_transactions.append(transaction)
-
-    balance = 0.0
-
-    # Si es receptor, aumenta el saldo. Si es emisor, disminuye el saldo
-    for valid_transaction in valid_transactions:
-        balance += valid_transaction[5] if valid_transaction[4] == user_email else -valid_transaction[5]
-
-    return balance
-
-
 def _get_balance(email):
-    transactions = transactions_model.get_transactions_from_user(email)
-    balance = _process_balance(email, transactions)
-
-    return balance
+    return transactions_model.get_balance(email)
 
 
 def send():
@@ -259,6 +232,21 @@ def actual_balance():
     email = ''
     try:
         email = security.get_user_with_token(token)[3]
+
+    except Exception as e:
+        json_response = {
+            "msg": 'Ocurrió un error desconocido'
+        }
+        status_code = 500
+
+        response.content_type = 'application/json'
+        response.status = status_code
+        return dumps(json_response)
+
+    # Obtenemos el id del usuario a partir del correo
+    id = ''
+    try:
+        id = get_userid_from_email(email)
 
     except Exception as e:
         json_response = {

@@ -3,8 +3,13 @@ Description=API Rest para la ucacoin
 After=syslog.target network.target
 
 [Service]
-WorkingDirectory=/home/abraham/PycharmProjects/ucacoin_api_server
-ExecStart=/home/abraham/PycharmProjects/ucacoin_api_server/venv/bin/python3.8 main.py
+# En remoto
+WorkingDirectory=/root/ucacoin/api/ucacoin_api_server
+ExecStart=/root/ucacoin/api/ucacoin_api_server/venv/bin/python3.8 main.py
+
+# En local
+#WorkingDirectory=/home/abraham/PycharmProjects/ucacoin_api_server
+#ExecStart=/home/abraham/PycharmProjects/ucacoin_api_server/venv/bin/python3.8 main.py
 
 Restart=always
 RestartSec=120

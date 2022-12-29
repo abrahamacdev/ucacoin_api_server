@@ -62,7 +62,8 @@ def initialize_db():
                 _create_example_data(cursor)
 
                 # Registramos a los usuarios en la blockchain
-                _register_example_keys(cursor)
+                # TODO Descomentar
+                #_register_example_keys(cursor)
 
                 Logger.info("Datos de ejemplo añadidos a la bd")
 

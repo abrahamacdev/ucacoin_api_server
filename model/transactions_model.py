@@ -6,7 +6,7 @@ import requests
 
 from logger import Logger
 from exceptions import *
-from model import db_manager
+from model import db_manager, users_model
 import constants
 
 
@@ -32,6 +32,35 @@ def get_transactions_from_user(email):
     except Error as e:
         raise e
 
+def get_balance(email):
+
+    # Hacemos la peticion
+    try:
+
+        user = users_model.get_user_from_email(email)
+
+        # Lo registramos en la blockchain
+        body = {
+            "username": user[1],
+            "private_key": user[2]
+        }
+
+        # Peticion http a la blockchain
+        url = constants.HTTP_PROTOCOL + constants.BLOCKCHAIN_API_IP + str(constants.BLOCKCHAIN_API_PORT) + constants.BLOCKCHAIN_BALANCE_ENDPOINT
+
+        blockchain_response = requests.get(url, json=body).json()
+
+        # Ocurrió un error
+        if blockchain_response['Code'] != 200:
+            raise Error("Ocurrió un error inesperado")
+
+        # Devolvemos el balance
+        else:
+            return blockchain_response['balance']
+
+    except Error as e:
+        Logger.error(e)
+        raise e
 
 def _send_to_blockchain(quantity, sender_username, receiver_username, private_key):
     # Lo registramos en la blockchain
