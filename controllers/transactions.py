@@ -259,9 +259,21 @@ def actual_balance():
         return dumps(json_response)
 
     # Obtenemos las transacciones del usuario
-    balance = _get_balance(email)
+    balance = 0
+    try:
+        balance = _get_balance(email)
 
-    # Las devolvemos
+    except Exception as e:
+        json_response = {
+            "msg": 'Ocurrió un error desconocido'
+        }
+        status_code = 500
+
+        response.content_type = 'application/json'
+        response.status = status_code
+        return dumps(json_response)
+
+    # Devolvemos el balance del usuario
     json_response = {
         "balance": balance
     }
