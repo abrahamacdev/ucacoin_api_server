@@ -133,7 +133,18 @@ def send():
         response.status = status_code
 
     # Comprobamos que tenga suficientes fondos
-    balance = _get_balance(sender_email)
+    balance = 0
+    try:
+        balance = _get_balance(sender_email)
+    except Exception as e:
+        json_response = {
+            "msg": 'Ocurrió un error desconocido'
+        }
+        status_code = 500
+
+        response.content_type = 'application/json'
+        response.status = status_code
+        return dumps(json_response)
 
     """ 
     En caso de que estemos enviando dinero desde la cuenta ROOT y estemos en modo desarrollo, no comprobaremos los fondos
