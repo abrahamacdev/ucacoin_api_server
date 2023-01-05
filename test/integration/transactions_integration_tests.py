@@ -13,6 +13,15 @@ SERVER_IP = constants.BLOCKCHAIN_API_IP
 class TransactionsIntegrationTests(unittest.TestCase):
 
     def test_cannot_send_more_than_i_have(self):
+        """
+        Comprobamos que no se pueda enviar más dinero del que dispone el usuario.
+        Partimos de:
+            * Token de usuario logueado válido
+            * Receptor existente
+            * Cantidad INVALIDA
+
+        El resultdo esperado es un código de error (HTTP Status Code) 500
+        """
 
         # Lo registramos en la blockchain
         body = {
@@ -34,6 +43,15 @@ class TransactionsIntegrationTests(unittest.TestCase):
 
 
     def test_cannot_send_to_inexistent_user(self):
+        """
+        Comprobamos que no se pueda enviar dinero a un usuario no registrado en el sistema.
+        Partimos de:
+            * Token de usuario logueado válido
+            * Receptor INEXISTENTE
+            * Cantidad valida
+
+        El resultdo esperado es un código de error (HTTP Status Code) 400
+        """
 
         # Lo registramos en la blockchain
         body = {
@@ -55,6 +73,15 @@ class TransactionsIntegrationTests(unittest.TestCase):
 
 
     def test_cannot_send_negative_quantity(self):
+        """
+        Comprobamos que no se pueda enviar una cantidad de dinero negativa.
+        Partimos de:
+            * Token de usuario logueado válido
+            * Receptor existente
+            * Cantidad NEGATIVA
+
+        El resultdo esperado es un código de error (HTTP Status Code) 400
+        """
 
         # Lo registramos en la blockchain
         body = {
