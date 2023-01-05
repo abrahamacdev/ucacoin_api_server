@@ -36,6 +36,7 @@ def send():
         quantity = float(request.json['cantidad'])
 
     except Exception as e:
+        Logger.error(e)
         json_response = {
             "msg": 'Peticion mal formulada'
         }
@@ -68,6 +69,7 @@ def send():
             response.status = status_code
             return dumps(json_response)
     except Exception as e:
+        Logger.error(e)
         json_response = {
             "msg": 'Ocurrió un error desconocido'
         }
@@ -88,6 +90,7 @@ def send():
         sender_id = user[0]
 
     except Exception as e:
+        Logger.error(e)
         json_response = {
             "msg": 'Ocurrió un error desconocido'
         }
@@ -103,6 +106,7 @@ def send():
         receiver_id = get_userid_from_username(receiver_username)
 
     except UserNotExistException as eUser:
+        Logger.error(eUser)
         json_response = {
             "msg": 'No existe dicho usuario'
         }
@@ -113,6 +117,7 @@ def send():
         return dumps(json_response)
 
     except Exception as e:
+        Logger.error(e)
         json_response = {
             "msg": 'Ocurrió un error desconocido'
         }
@@ -137,6 +142,7 @@ def send():
     try:
         balance = _get_balance(sender_email)
     except Exception as e:
+        Logger.error(e)
         json_response = {
             "msg": 'Ocurrió un error desconocido'
         }
@@ -173,6 +179,7 @@ def send():
         transactions_model.add_new_transaction(quantity, sender_id, receiver_id, sender_username, receiver_username, private_key)
 
     except BlockchainTransferError as transferE:
+        Logger.error(transferE)
         json_response = {
             "msg": 'No se añadir la transferencia a la blockchain'
         }
@@ -183,6 +190,7 @@ def send():
         return dumps(json_response)
 
     except Exception as e:
+        Logger.error(e)
         json_response = {
             "msg": 'Ocurrio un error inesperado'
         }

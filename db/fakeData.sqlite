@@ -1,5 +1,5 @@
 INSERT INTO usuario(id, nombre_usuario, passwd_hasheada, email) VALUES
-    (1, 'system', '4813494d137e1631bba301d5acab6e7bb7aa74ce1185d456565ef51d737677b2', 'root@ucacoin.com'),
+    (1, 'root', '4813494d137e1631bba301d5acab6e7bb7aa74ce1185d456565ef51d737677b2', 'root@ucacoin.com'),
     (2, 'pepito', 'c8cdf720db5562a039be5d81c51a07c5120eaf0bf142b2144f1a1eb7a95678d3', 'pepito@gmail.com');
     /*(3, 'juanito', '46b2150accc75b4ae7b461fe4f5dde39512d2e034ee4d91df9c09b9bd0e090c9', 'juanito@gmail.com');*/
 
