@@ -16,7 +16,7 @@ HTTP_PROTOCOL = "http://"
 # --- BLockchain core ---
 BLOCKCHAIN_API_PORT = 8081  # Puerto en el que está ejecutandose la api de la blockchain
 #BLOCKCHAIN_API_IP = "0.0.0.0:"
-BLOCKCHAIN_API_IP = "167.99.242.19:"
+BLOCKCHAIN_API_IP = "178.62.19.126:"
 
 BLOCKCHAIN_REGISTER_ENDPOINT = "/Register"
 BLOCKCHAIN_SEND_COINS_ENDPOINT = "/Transfer"

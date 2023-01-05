@@ -37,16 +37,19 @@ def get_balance(email):
     # Hacemos la peticion
     try:
 
+
         user = users_model.get_user_from_email(email)
 
         # Lo registramos en la blockchain
         body = {
             "username": user[1],
-            "private_key": user[2]
+            "private_key": user[4]
         }
 
         # Peticion http a la blockchain
         url = constants.HTTP_PROTOCOL + constants.BLOCKCHAIN_API_IP + str(constants.BLOCKCHAIN_API_PORT) + constants.BLOCKCHAIN_BALANCE_ENDPOINT
+
+        Logger.info(requests.get(url, json=body).text)
 
         blockchain_response = requests.get(url, json=body).json()
 
