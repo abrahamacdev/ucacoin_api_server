@@ -1,13 +1,20 @@
-from bottle import Bottle, route, run, template
+from bottle import Bottle, response
 
 from controllers import users
 from controllers import transactions
 
-def setup_routes():
-    app = Bottle()
+app = Bottle()
 
+@app.hook('after_request')
+def enable_cors():
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    response.headers['Access-Control-Allow-Methods'] = 'PUT, GET, POST, DELETE, OPTIONS'
+    response.headers['Access-Control-Allow-Headers'] = 'Origin, Accept, Content-Type, X-Requested-With, X-CSRF-Token'
+
+
+def setup_routes():
     # Relacionado con los usuarios
-    app.route('/login', 'POST', users.login)        # En local, nada de JWT
+    app.route('/login', 'POST', users.login)  # En local, nada de JWT
     app.route('/registro', 'POST', users.register)
     app.route('/logout', 'POST', users.logout)
 
