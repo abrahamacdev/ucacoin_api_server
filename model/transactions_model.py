@@ -19,7 +19,7 @@ def get_transactions_from_user(email):
         cursor = conn.cursor()
 
         # Comprobamos si existe un con dicho email
-        res = cursor.execute('''SELECT t.id 'id', o1.nombre_usuario 'emisor', o1.email, o2.nombre_usuario 'receptor', o2.email, t.cantidad, CAST(strftime('%s', t.fecha_envio) as integer), CAST(strftime('%s', t.fecha_recepcion) as integer) 
+        res = cursor.execute('''SELECT t.id 'id', o1.nombre_usuario 'emisor', o1.email, o2.nombre_usuario 'receptor', o2.email, t.cantidad, (CAST(strftime('%s', t.fecha_envio) as integer) * 1000), (CAST(strftime('%s', t.fecha_recepcion) as integer) * 1000) 
                              FROM transaccion as t 
                              INNER JOIN  usuario o1 ON t.id_emisor = o1.id 
                              INNER JOIN usuario o2 ON t.id_receptor = o2.id 
@@ -48,8 +48,6 @@ def get_balance(email):
 
         # Peticion http a la blockchain
         url = constants.HTTP_PROTOCOL + constants.BLOCKCHAIN_API_IP + str(constants.BLOCKCHAIN_API_PORT) + constants.BLOCKCHAIN_BALANCE_ENDPOINT
-
-        Logger.info(requests.get(url, json=body).text)
 
         blockchain_response = requests.get(url, json=body).json()
 
