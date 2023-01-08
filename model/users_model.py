@@ -216,7 +216,7 @@ def login_user(email, passwd):
 
         # El usuario ya está logueado
         if _is_user_logged_by_email(email):
-            raise UserIsLoggedException()
+            return _get_user_token_by_email(email)
 
         # Logueamos al usuario
         else:
@@ -267,6 +267,25 @@ def _is_user_logged_by_token(token):
 
     return res.fetchone() is not None
 
+def _get_user_token_by_email(email):
+    """
+        Devuelve el token del usuario en caso de estar logueado.
+        :param email: Email del usuario.
+        :return: Token del usuario.
+        :raise Error
+        """
+
+    conn = db_manager.get_conn()
+
+    # Datos que usaremos para realizar la consulta
+    data = (email,)
+
+    cursor = conn.cursor()
+
+    # Comprobamos si existe un con dicho email
+    res = cursor.execute("SELECT token FROM login WHERE email = ?", data)
+
+    return res.fetchone()[0]
 
 def _login(mail):
     """
