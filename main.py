@@ -1,15 +1,11 @@
+from bottle import run
+
 import constants
 import logger
 from model.db_manager import *
 from controllers.router import *
 
 from logger import Logger
-
-@route('/hello/<name>')
-def index(name):
-    name + 123
-    return template('<b>Hello {{name}}</b>!', name=name)
-
 
 if __name__ == "__main__":
 
